@@ -32,8 +32,7 @@ class SessionActivityMiddleware:
 
                 if session:
                     # Check session timeout
-                    inactive_time = (timezone.now() -
-                                     session.last_activity).total_seconds()
+                    inactive_time = (timezone.now() -session.last_activity).total_seconds()
                     if inactive_time > settings.INACTIVE_SESSION_TIMEOUT:
                         session.is_active = False
                         session.save()

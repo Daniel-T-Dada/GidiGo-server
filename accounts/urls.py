@@ -25,8 +25,7 @@ urlpatterns = [
 
     # Password reset endpoints
     path('auth/password/reset/', PasswordResetView.as_view(), name='password-reset'),
-    path('auth/password/reset/confirm/<str:uidb64>/<str:token>/',
-         PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('auth/password/reset/confirm/<str:uidb64>/<str:token>/',PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 
     # Token endpoints
     path('auth/token/verify/', TokenVerifyView.as_view(), name='token-verify'),
@@ -37,8 +36,7 @@ urlpatterns = [
 
     # Session management endpoints
     path('auth/sessions/', UserSessionView.as_view(), name='sessions-list'),
-    path('auth/sessions/<int:session_id>/',
-         UserSessionView.as_view(), name='session-detail'),
+    path('auth/sessions/<int:session_id>/',UserSessionView.as_view(), name='session-detail'),
 
     # Pusher authentication
     path('auth/pusher/auth/', pusher_auth, name='pusher-auth'),

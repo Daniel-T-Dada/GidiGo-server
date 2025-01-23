@@ -11,9 +11,6 @@ import os
 from django.core.wsgi import get_wsgi_application
 
 # Set the Django settings module based on environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                      'gidigo_server.settings_prod' if os.environ.get('DJANGO_ENV') == 'production'
-                      else 'gidigo_server.settings'
-                      )
+os.environ.setdefault('DJANGO_SETTINGS_MODULE','gidigo_server.settings_prod' if os.environ.get('DJANGO_ENV') == 'production'else 'gidigo_server.settings')
 
 application = get_wsgi_application()
