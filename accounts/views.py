@@ -376,8 +376,7 @@ class PasswordResetView(APIView):
                 # Send password reset email
                 frontend_url = settings.FRONTEND_URL.rstrip('/')
                 reset_url = f"{frontend_url}/reset-password/{uid}/{token}"
-                email_content = f'Click the following link to reset your password: {
-                    reset_url}'
+                email_content = f'Click the following link to reset your password: {reset_url}'
                 send_mail(
                     'Reset your password',
                     email_content,
