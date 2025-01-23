@@ -306,8 +306,7 @@ def pusher_auth(request):
     socket_id = request.data.get('socket_id')
     channel_name = request.data.get('channel_name')
 
-    print(f"Auth request for socket_id: {
-          socket_id}, channel: {channel_name}")  # Debug log
+    print(f"Auth request for socket_id: {socket_id}, channel: {channel_name}")  # Debug log
 
     if not socket_id or not channel_name:
         print("Missing socket_id or channel_name")  # Debug log
