@@ -117,8 +117,7 @@ class LoginView(APIView):
                 existing_session = UserSession.objects.filter(
                     user=user,
                     device_type=device_type,
-                    browser=f"{user_agent.browser.family} {
-                        user_agent.browser.version_string}",
+                    browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
                     ip_address=ip_address,
                     is_active=True
                 ).first()
@@ -148,12 +147,9 @@ class LoginView(APIView):
                             user=user,
                             token=token_hash,
                             device_type=device_type,
-                            browser=f"{user_agent.browser.family} {
-                                user_agent.browser.version_string}",
-                            ip_address=ip_address,
-                            user_agent=user_agent_string,
-                            os_info=f"{user_agent.os.family} {
-                                user_agent.os.version_string}"
+                            browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
+                            ip_address=ip_address,user_agent=user_agent_string,
+                            os_info=f"{user_agent.os.family} {user_agent.os.version_string}"
                         )
 
                     # Check for suspicious activity
@@ -164,8 +160,7 @@ class LoginView(APIView):
                     ).count()
 
                     if recent_failed_attempts >= 5:
-                        session.mark_suspicious(
-                            "Multiple failed login attempts across devices")
+                        session.mark_suspicious("Multiple failed login attempts across devices")
 
                     # Check for multiple locations
                     active_sessions = UserSession.objects.filter(
@@ -174,11 +169,9 @@ class LoginView(APIView):
                     ).exclude(id=session.id)
 
                     if active_sessions.exists():
-                        distinct_ips = set(
-                            active_sessions.values_list('ip_address', flat=True))
+                        distinct_ips = set(active_sessions.values_list('ip_address', flat=True))
                         if len(distinct_ips) >= 3:  # More than 3 different IPs
-                            session.mark_suspicious(
-                                "Multiple logins from different locations")
+                            session.mark_suspicious("Multiple logins from different locations")
 
                     return Response({
                         'id': user.pk,
@@ -205,8 +198,7 @@ class LoginView(APIView):
                         session = UserSession.objects.filter(
                             user=attempted_user,
                             device_type=device_type,
-                            browser=f"{user_agent.browser.family} {
-                                user_agent.browser.version_string}",
+                            browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
                             ip_address=ip_address
                         ).first()
 
@@ -216,12 +208,10 @@ class LoginView(APIView):
                             UserSession.objects.create(
                                 user=attempted_user,
                                 device_type=device_type,
-                                browser=f"{user_agent.browser.family} {
-                                    user_agent.browser.version_string}",
+                                browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
                                 ip_address=ip_address,
                                 user_agent=user_agent_string,
-                                os_info=f"{user_agent.os.family} {
-                                    user_agent.os.version_string}",
+                                os_info=f"{user_agent.os.family} {user_agent.os.version_string}",
                                 login_successful=False,
                                 login_attempts=1,
                                 last_failed_attempt=timezone.now()
@@ -323,8 +313,7 @@ def pusher_auth(request):
     socket_id = request.data.get('socket_id')
     channel_name = request.data.get('channel_name')
 
-    print(f"Auth request for socket_id: {
-          socket_id}, channel: {channel_name}")  # Debug log
+    print(f"Auth request for socket_id: {socket_id}, channel: {channel_name}")  # Debug log
 
     if not socket_id or not channel_name:
         print("Missing socket_id or channel_name")  # Debug log
@@ -347,8 +336,7 @@ def pusher_auth(request):
                     }
                 }
             )
-            print(f"Successfully authenticated channel for user: {
-                  request.user.username}")  # Debug log
+            print(f"Successfully authenticated channel for user: {request.user.username}")  # Debug log
             return Response(auth)
         except Exception as e:
             print(f"Pusher authentication failed: {str(e)}")  # Debug log
@@ -382,8 +370,7 @@ class PasswordResetView(APIView):
                     settings.FRONTEND_URL}/reset-password/{uid}/{token}"
                 send_mail(
                     'Reset your password',
-                    f'Click the following link to reset your password: {
-                        reset_url}',
+                    f'Click the following link to reset your password: {reset_url}',
                     settings.DEFAULT_FROM_EMAIL,
                     [email],
                     fail_silently=False,
