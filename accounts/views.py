@@ -65,17 +65,13 @@ class CreateUserView(APIView):
         device_type = 'mobile' if user_agent.is_mobile else 'tablet' if user_agent.is_tablet else 'desktop'
         ip_address = request.META.get('REMOTE_ADDR')
 
-        # Create or update session record
-        session = UserSession.objects.create(
-            user=user,
-            token=token_hash,
-            device_type=device_type,
-            browser=f"{user_agent.browser.family} {
-                user_agent.browser.version_string}",
-            ip_address=ip_address,
-            user_agent=user_agent_string,
-            os_info=f"{user_agent.os.family} {user_agent.os.version_string}"
-        )
+        # Get browser and OS info
+        browser_string = format_browser_string(user_agent)
+        os_string = format_os_string(user_agent)
+
+        # Create session
+        session = create_user_session(
+            user, token_hash, device_type, user_agent, ip_address, user_agent_string)
 
         # Return user data and tokens
         return Response({
@@ -117,7 +113,7 @@ class LoginView(APIView):
                 existing_session = UserSession.objects.filter(
                     user=user,
                     device_type=device_type,
-                    browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
+                    browser=format_browser_string(user_agent),
                     ip_address=ip_address,
                     is_active=True
                 ).first()
@@ -143,14 +139,8 @@ class LoginView(APIView):
                         existing_session.save()
                         session = existing_session
                     else:
-                        session = UserSession.objects.create(
-                            user=user,
-                            token=token_hash,
-                            device_type=device_type,
-                            browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
-                            ip_address=ip_address,user_agent=user_agent_string,
-                            os_info=f"{user_agent.os.family} {user_agent.os.version_string}"
-                        )
+                        session = create_user_session(
+                            user, token_hash, device_type, user_agent, ip_address, user_agent_string)
 
                     # Check for suspicious activity
                     recent_failed_attempts = UserSession.objects.filter(
@@ -160,7 +150,8 @@ class LoginView(APIView):
                     ).count()
 
                     if recent_failed_attempts >= 5:
-                        session.mark_suspicious("Multiple failed login attempts across devices")
+                        session.mark_suspicious(
+                            "Multiple failed login attempts across devices")
 
                     # Check for multiple locations
                     active_sessions = UserSession.objects.filter(
@@ -169,9 +160,11 @@ class LoginView(APIView):
                     ).exclude(id=session.id)
 
                     if active_sessions.exists():
-                        distinct_ips = set(active_sessions.values_list('ip_address', flat=True))
+                        distinct_ips = set(
+                            active_sessions.values_list('ip_address', flat=True))
                         if len(distinct_ips) >= 3:  # More than 3 different IPs
-                            session.mark_suspicious("Multiple logins from different locations")
+                            session.mark_suspicious(
+                                "Multiple logins from different locations")
 
                     return Response({
                         'id': user.pk,
@@ -198,7 +191,7 @@ class LoginView(APIView):
                         session = UserSession.objects.filter(
                             user=attempted_user,
                             device_type=device_type,
-                            browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
+                            browser=format_browser_string(user_agent),
                             ip_address=ip_address
                         ).first()
 
@@ -208,10 +201,10 @@ class LoginView(APIView):
                             UserSession.objects.create(
                                 user=attempted_user,
                                 device_type=device_type,
-                                browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
+                                browser=format_browser_string(user_agent),
                                 ip_address=ip_address,
                                 user_agent=user_agent_string,
-                                os_info=f"{user_agent.os.family} {user_agent.os.version_string}",
+                                os_info=format_os_string(user_agent),
                                 login_successful=False,
                                 login_attempts=1,
                                 last_failed_attempt=timezone.now()
@@ -313,7 +306,8 @@ def pusher_auth(request):
     socket_id = request.data.get('socket_id')
     channel_name = request.data.get('channel_name')
 
-    print(f"Auth request for socket_id: {socket_id}, channel: {channel_name}")  # Debug log
+    print(f"Auth request for socket_id: {
+          socket_id}, channel: {channel_name}")  # Debug log
 
     if not socket_id or not channel_name:
         print("Missing socket_id or channel_name")  # Debug log
@@ -336,7 +330,8 @@ def pusher_auth(request):
                     }
                 }
             )
-            print(f"Successfully authenticated channel for user: {request.user.username}")  # Debug log
+            print(f"Successfully authenticated channel for user: {
+                  request.user.username}")  # Debug log
             return Response(auth)
         except Exception as e:
             print(f"Pusher authentication failed: {str(e)}")  # Debug log
@@ -366,11 +361,13 @@ class PasswordResetView(APIView):
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
 
                 # Send password reset email
-                reset_url = f"{
-                    settings.FRONTEND_URL}/reset-password/{uid}/{token}"
+                frontend_url = settings.FRONTEND_URL.rstrip('/')
+                reset_url = f"{frontend_url}/reset-password/{uid}/{token}"
+                email_content = f'Click the following link to reset your password: {
+                    reset_url}'
                 send_mail(
                     'Reset your password',
-                    f'Click the following link to reset your password: {reset_url}',
+                    email_content,
                     settings.DEFAULT_FROM_EMAIL,
                     [email],
                     fail_silently=False,
@@ -494,3 +491,27 @@ def check_environment(request):
             'debug_mode': settings.DEBUG,
         })
     return Response({'message': 'Not available in production'})
+
+
+def format_browser_string(user_agent):
+    """Helper function to format browser string"""
+    return f"{user_agent.browser.family} {user_agent.browser.version_string}"
+
+
+def format_os_string(user_agent):
+    """Helper function to format OS string"""
+    return f"{user_agent.os.family} {user_agent.os.version_string}"
+
+
+def create_user_session(user, token_hash, device_type, user_agent, ip_address, user_agent_string, login_successful=True):
+    """Helper function to create user session"""
+    return UserSession.objects.create(
+        user=user,
+        token=token_hash,
+        device_type=device_type,
+        browser=format_browser_string(user_agent),
+        ip_address=ip_address,
+        user_agent=user_agent_string,
+        os_info=format_os_string(user_agent),
+        login_successful=login_successful
+    )
