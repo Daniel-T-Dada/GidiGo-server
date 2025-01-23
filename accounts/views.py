@@ -26,21 +26,37 @@ from user_agents import parse
 from .models import UserSession
 from django.utils import timezone
 from datetime import timedelta
+import os
 
 User = get_user_model()
 
-# Initialize Pusher if settings are valid
-try:
-    pusher_client = pusher.Pusher(
-        app_id=settings.PUSHER_APP_ID,
-        key=settings.PUSHER_KEY,
-        secret=settings.PUSHER_SECRET,
-        cluster=settings.PUSHER_CLUSTER,
-        ssl=True
-    )
-except Exception as e:
-    print(f"Warning: Pusher initialization failed - {str(e)}")
-    pusher_client = None
+# Initialize Pusher client
+pusher_client = None
+if settings.DEBUG:
+    # In development, only initialize if credentials exist
+    if all([os.getenv(key) for key in ['PUSHER_APP_ID', 'PUSHER_KEY', 'PUSHER_SECRET', 'PUSHER_CLUSTER']]):
+        try:
+            pusher_client = pusher.Pusher(
+                app_id=os.getenv('PUSHER_APP_ID'),
+                key=os.getenv('PUSHER_KEY'),
+                secret=os.getenv('PUSHER_SECRET'),
+                cluster=os.getenv('PUSHER_CLUSTER'),
+                ssl=True
+            )
+        except Exception as e:
+            print(f"Pusher initialization skipped in development: {str(e)}")
+else:
+    # In production, always try to initialize
+    try:
+        pusher_client = pusher.Pusher(
+            app_id=os.getenv('PUSHER_APP_ID'),
+            key=os.getenv('PUSHER_KEY'),
+            secret=os.getenv('PUSHER_SECRET'),
+            cluster=os.getenv('PUSHER_CLUSTER'),
+            ssl=True
+        )
+    except Exception as e:
+        print(f"Warning: Pusher initialization failed in production: {str(e)}")
 
 
 class CreateUserView(APIView):
@@ -306,7 +322,8 @@ def pusher_auth(request):
     socket_id = request.data.get('socket_id')
     channel_name = request.data.get('channel_name')
 
-    print(f"Auth request for socket_id: {socket_id}, channel: {channel_name}")  # Debug log
+    print(f"Auth request for socket_id: {
+          socket_id}, channel: {channel_name}")  # Debug log
 
     if not socket_id or not channel_name:
         print("Missing socket_id or channel_name")  # Debug log
@@ -329,7 +346,8 @@ def pusher_auth(request):
                     }
                 }
             )
-            print(f"Successfully authenticated channel for user: {request.user.username}")  # Debug log
+            print(f"Successfully authenticated channel for user: {
+                  request.user.username}")  # Debug log
             return Response(auth)
         except Exception as e:
             print(f"Pusher authentication failed: {str(e)}")  # Debug log
@@ -361,7 +379,8 @@ class PasswordResetView(APIView):
                 # Send password reset email
                 frontend_url = settings.FRONTEND_URL.rstrip('/')
                 reset_url = f"{frontend_url}/reset-password/{uid}/{token}"
-                email_content = f'Click the following link to reset your password: {reset_url}'
+                email_content = f'Click the following link to reset your password: {
+                    reset_url}'
                 send_mail(
                     'Reset your password',
                     email_content,

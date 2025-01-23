@@ -2,10 +2,14 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from dotenv import load_dotenv
 
 
 def main():
     """Run administrative tasks."""
+    # Load environment variables from .env file
+    load_dotenv()
+
     # Set the Django settings module based on environment
     os.environ.setdefault('DJANGO_SETTINGS_MODULE',
                           'gidigo_server.settings_prod' if os.environ.get('DJANGO_ENV') == 'production'
