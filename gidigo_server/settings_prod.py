@@ -1,6 +1,10 @@
 from .settings import *
-import dj_database_url
 import os
+from dotenv import load_dotenv
+from urllib.parse import urlparse
+import dj_database_url
+
+load_dotenv()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -13,6 +17,22 @@ if not SECRET_KEY:
 # Update allowed hosts - get from environment or use default
 ALLOWED_HOSTS = os.environ.get(
     'ALLOWED_HOSTS', 'gidigo-backend.onrender.com,.gidigo.com').split(',')
+
+# Database Configuration
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
+        'CONN_MAX_AGE': 600,
+        'CONN_HEALTH_CHECKS': True,
+    }
+}
 
 # Logging configuration
 LOGGING = {
@@ -96,15 +116,6 @@ REST_FRAMEWORK = {
         'anon': '100/day',  # Limit anonymous users
         'user': '1000/day'  # Limit authenticated users
     }
-}
-
-# Configure database using dj_database_url
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
 }
 
 # CORS settings
