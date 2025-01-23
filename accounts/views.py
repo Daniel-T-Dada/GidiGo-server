@@ -70,8 +70,7 @@ class CreateUserView(APIView):
             user=user,
             token=token_hash,
             device_type=device_type,
-            browser=f"{user_agent.browser.family} {
-                user_agent.browser.version_string}",
+            browser=f"{user_agent.browser.family} {user_agent.browser.version_string}",
             ip_address=ip_address,
             user_agent=user_agent_string,
             os_info=f"{user_agent.os.family} {user_agent.os.version_string}"
