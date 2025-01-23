@@ -329,8 +329,7 @@ def pusher_auth(request):
                     }
                 }
             )
-            print(f"Successfully authenticated channel for user: {
-                  request.user.username}")  # Debug log
+            print(f"Successfully authenticated channel for user: {request.user.username}")  # Debug log
             return Response(auth)
         except Exception as e:
             print(f"Pusher authentication failed: {str(e)}")  # Debug log
