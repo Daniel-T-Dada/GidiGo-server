@@ -110,8 +110,8 @@ class UserSession(models.Model):
 
     def mark_suspicious(self, reason):
         self.is_suspicious = True
-        self.security_notes = f"{timezone.now()}: {reason}\n{
-            self.security_notes or ''}"
+        current_notes = self.security_notes or ''
+        self.security_notes = f"{timezone.now()}: {reason}\n{current_notes}"
         self.save()
 
     def record_login_attempt(self, successful):
