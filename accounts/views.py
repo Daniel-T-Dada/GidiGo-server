@@ -176,8 +176,7 @@ class LoginView(APIView):
                     ).exclude(id=session.id)
 
                     if active_sessions.exists():
-                        distinct_ips = set(
-                            active_sessions.values_list('ip_address', flat=True))
+                        distinct_ips = set(active_sessions.values_list('ip_address', flat=True))
                         if len(distinct_ips) >= 3:  # More than 3 different IPs
                             session.mark_suspicious(
                                 "Multiple logins from different locations")
@@ -322,8 +321,7 @@ def pusher_auth(request):
     socket_id = request.data.get('socket_id')
     channel_name = request.data.get('channel_name')
 
-    print(f"Auth request for socket_id: {
-          socket_id}, channel: {channel_name}")  # Debug log
+    print(f"Auth request for socket_id: {socket_id}, channel: {channel_name}")  # Debug log
 
     if not socket_id or not channel_name:
         print("Missing socket_id or channel_name")  # Debug log
@@ -346,8 +344,7 @@ def pusher_auth(request):
                     }
                 }
             )
-            print(f"Successfully authenticated channel for user: {
-                  request.user.username}")  # Debug log
+            print(f"Successfully authenticated channel for user: {request.user.username}")  # Debug log
             return Response(auth)
         except Exception as e:
             print(f"Pusher authentication failed: {str(e)}")  # Debug log
