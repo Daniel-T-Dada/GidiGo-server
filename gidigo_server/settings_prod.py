@@ -93,8 +93,8 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_TRUSTED_ORIGINS = [
-    'https://gidigo-server.onrender.com',
-    'https://gidigo.com'
+    'https://gidigo.vercel.app',
+    'http://localhost:3000',  # For local development
 ]
 
 # Password Security
@@ -128,7 +128,7 @@ REST_FRAMEWORK = {
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "https://gidigo.vercel.app",
-    "https://gidigo.com",
+    "http://localhost:3000",  # For local development
 ]
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
