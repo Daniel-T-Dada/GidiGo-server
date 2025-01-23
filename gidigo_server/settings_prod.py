@@ -15,8 +15,12 @@ if not SECRET_KEY:
     raise ValueError("No SECRET_KEY set in environment variables")
 
 # Update allowed hosts - get from environment or use default
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', 'gidigo-backend.onrender.com,.gidigo.com').split(',')
+ALLOWED_HOSTS = [
+    'gidigo-server.onrender.com',
+    'gidigo.vercel.app',
+    'localhost',
+    '127.0.0.1'
+]
 
 # Database Configuration
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
@@ -86,7 +90,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_TRUSTED_ORIGINS = [
-    'https://gidigo-backend.onrender.com',
+    'https://gidigo-server.onrender.com/',
     'https://gidigo.com',
 ]
 
@@ -99,8 +103,7 @@ PASSWORD_HASHERS = [
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-     'OPTIONS': {'min_length': 12}},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator','OPTIONS': {'min_length': 12}},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]

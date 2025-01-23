@@ -65,8 +65,8 @@ class CreateUserView(APIView):
         device_type = 'mobile' if user_agent.is_mobile else 'tablet' if user_agent.is_tablet else 'desktop'
         ip_address = request.META.get('REMOTE_ADDR')
 
-        # Create user session
-        UserSession.objects.create(
+        # Create or update session record
+        session = UserSession.objects.create(
             user=user,
             token=token_hash,
             device_type=device_type,
